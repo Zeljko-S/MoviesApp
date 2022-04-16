@@ -14,32 +14,34 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.movies.ui.theme.MoviesTheme
+import com.example.movies.widgets.FavoriteIcon
 import com.example.movies.widgets.MovieRow
 import com.example.testapp.models.Movie
 import com.example.testapp.models.getMovies
+import models.FavoritesViewModel
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
-fun HomeScreen(navController: NavController = rememberNavController()) {
+fun HomeScreen(navController: NavController = rememberNavController(), viewModel: FavoritesViewModel = viewModel()) {
 
-    var showFavorites by remember {
+
+    var showMenu by remember {
         mutableStateOf(false)
     }
 
     Scaffold(
         topBar = {
-            TopAppBar(title = { Text(text = "Homescreen") },
+            TopAppBar(title = { Text(text = "Movies") },
                 actions = {
-                    IconButton(onClick = { showFavorites = !showFavorites }) {
+                    IconButton(onClick = { showMenu = !showMenu }) {
                         Icon(imageVector = Icons.Default.MoreVert, contentDescription = "More")
                     }
 
-                    DropdownMenu(
-                        expanded = showFavorites,
-                        onDismissRequest = { showFavorites = false }) {
+                    DropdownMenu(expanded = showMenu, onDismissRequest = { showMenu = false }) {
                         DropdownMenuItem(onClick = { navController.navigate(route = "FavoritesScreen") }) {
                             Row() {
                                 Icon(
@@ -61,20 +63,35 @@ fun HomeScreen(navController: NavController = rememberNavController()) {
             )
         }
     ) {
-        MainContent(navController = navController)
+        MainContent(navController = navController, viewModel = viewModel)
     }
 }
 
 @ExperimentalAnimationApi
 @Composable
-fun MainContent(navController: NavController, movieList: List<Movie> = getMovies()) {
+fun MainContent(navController: NavController, movieList: List<Movie> = getMovies(), viewModel: FavoritesViewModel) {
 
     LazyColumn {
         items(movieList) { name ->
-            MovieRow(name) { movieId ->
-                //Log.d("MainContent","My callback value: $movieId")
-                navController.navigate(route = "detailscreen/$movieId")
+            Row {
+                MovieRow(name,
+                    onItemClick = { movieId ->
+                        //Log.d("MainContent","My callback value: $movieId")
+                        navController.navigate(route = "detailscreen/$movieId")
+                    },
+                    content = {
+                        FavoriteIcon(movie = name, favorite = viewModel.checkMovie(name),
+                            onFavClick = { favmovie ->
+                                if (!viewModel.checkMovie(favmovie)) {
+                                    viewModel.addMovie(favmovie)
 
+                                } else {
+                                    viewModel.removeMovie(favmovie)
+
+                                }
+
+                            })
+                    })
             }
         }
     }

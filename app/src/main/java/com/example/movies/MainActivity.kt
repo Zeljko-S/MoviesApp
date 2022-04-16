@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.os.Message
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.animateContentSize
@@ -24,16 +25,19 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.platform.textInputServiceFactory
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.jetpackcompose.screen.HomeScreen
 import com.example.movies.navigation.MovieNavigation
 import com.example.movies.ui.theme.MoviesTheme
 import com.example.testapp.models.Movie
 import com.example.testapp.models.getMovies
+import models.FavoritesViewModel
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         setContent {
-            TopBar {
+            MyApp {
 
                 MovieNavigation()
 
@@ -44,26 +48,16 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun TopBar(content: @Composable () -> Unit) {
+fun MyApp(content: @Composable () -> Unit) {
     MoviesTheme {
         content()
     }
-}
-
-
-@OptIn(ExperimentalAnimationApi::class)
-
-
-@Composable
-fun Greeting(name: String) {
-    Text(text = "Hello $name!")
-
 }
 
 @Preview(showBackground = true)
 @Composable
 fun DefaultPreview() {
     MoviesTheme {
-        Greeting("Android")
+        HomeScreen()
     }
 }

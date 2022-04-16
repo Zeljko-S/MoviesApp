@@ -16,62 +16,79 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.movies.ui.theme.MoviesTheme
+import com.example.movies.widgets.FavoriteIcon
 import com.example.movies.widgets.HorizontalScrollableImageView
 import com.example.movies.widgets.MovieRow
 import com.example.testapp.models.Movie
 import com.example.testapp.models.getMovies
+import models.FavoritesViewModel
 
 @Composable
-fun DetailScreen(navController: NavController = rememberNavController(), movieId: String?) {
+fun DetailScreen(navController: NavController = rememberNavController(), movieId: String?, viewModel: FavoritesViewModel) {
+
     val movie = filterMovie(movieId = movieId)
-    MainContent(navController = navController) {
-
-
-        Surface(
-            modifier = Modifier
-                .fillMaxWidth()
-                .fillMaxHeight()
-        ) {
-            Column {
-                MovieRow(movie = movie)
-                Spacer(modifier = Modifier.height(12.dp))
-                Divider()
-                Text(
-                    text = "Movie Images",
-                    style = MaterialTheme.typography.h5,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth()
-                )
-                HorizontalScrollableImageView(movie = movie)
-            }
-        }
-    }
-
-
-}
-
-
-@Composable
-fun MainContent(navController: NavController, content: @Composable () -> Unit) {
 
     Scaffold(
         topBar = {
-            TopAppBar(elevation = 3.dp) {
+            TopAppBar(elevation = 3.dp ) {
                 Row {
                     Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Arrow back",
                         modifier = Modifier.clickable {
-                            navController.popBackStack()
+                            navController.popBackStack()    // go back to last screen
                         })
+
                     Spacer(modifier = Modifier.width(20.dp))
-                    Text(text = "Movie", style = MaterialTheme.typography.h6)
+
+                    Text(text = movie.title, style = MaterialTheme.typography.h6)
                 }
+
             }
         }
     ) {
-        content()
+        MainContent(movie = movie, viewmodel = viewModel)
     }
+
 }
 
-fun filterMovie(movieId: String?): Movie {
+@Composable
+fun MainContent(movie: Movie, viewmodel: FavoritesViewModel) {
+
+    Surface(modifier = Modifier
+        .fillMaxWidth()
+        .fillMaxHeight()) {
+
+        Column {
+            MovieRow(
+                movie = movie,
+                content = {
+                    FavoriteIcon(movie = movie, favorite = viewmodel.checkMovie(movie),
+                        onFavClick = { favmovie ->
+                            if (!viewmodel.checkMovie(favmovie)) {
+                                viewmodel.addMovie(favmovie)
+
+                            } else {
+                                viewmodel.removeMovie(favmovie)
+
+                            }
+
+                        })
+                }
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+            Divider()
+
+            Text(text = "Movie Images", style = MaterialTheme.typography.h5, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
+
+            HorizontalScrollableImageView(movie = movie)
+
+        }
+    }
+
+
+}
+
+
+fun filterMovie(movieId: String?) : Movie {
     return getMovies().filter { movie -> movie.id == movieId }[0]
 }

@@ -13,13 +13,12 @@ import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountBox
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.KeyboardArrowUp
+import androidx.compose.material.icons.filled.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
@@ -33,11 +32,14 @@ import com.example.testapp.models.getMovies
 @Composable
 fun MovieRow(
     movie: Movie,
-    onItemClick: (String) -> Unit = {}
+    onItemClick: (String) -> Unit = {},
+    content: @Composable () -> Unit = {},
+
 ) {
 
     var arrow by remember { mutableStateOf(false) }
     var visible by remember { mutableStateOf(false) }
+
 
     Card(
         modifier = Modifier
@@ -50,8 +52,6 @@ fun MovieRow(
             .animateContentSize()
             .clickable {
                 onItemClick(movie.id)
-                // arrow = !arrow
-                //  visible = !visible
             },
         shape = RoundedCornerShape(corner = CornerSize(16.dp)),
         elevation = 6.dp
@@ -63,10 +63,8 @@ fun MovieRow(
                 modifier = Modifier
                     .padding(12.dp)
                     .size(100.dp),
-                //shape = RectangleShape,
-                //elevation = 6.dp
             ) {
-                //Icon(imageVector = Icons.Default.AccountBox, contentDescription = "profile pic")
+
                 AsyncImage(
                     model = movie.images[0],
                     contentDescription = null,
@@ -121,26 +119,59 @@ fun MovieRow(
                     }
                 }
             }
+            content()
         }
     }
 }
+@Composable
+fun FavoriteIcon(movie: Movie, onFavClick: (Movie) -> Unit = {}, favorite: Boolean) {
+
+    Surface(
+        modifier = Modifier
+            .padding(10.dp)
+    ) {
+
+        Column(horizontalAlignment = Alignment.End, modifier = Modifier.fillMaxWidth()) {
+            IconButton(onClick = {
+                onFavClick(movie)
+            }) {
+                if (!favorite) {
+                    Icon(
+                        imageVector = Icons.Default.FavoriteBorder,
+                        contentDescription = "Favorites",
+                        tint = Color.Cyan
+                    )
+                } else {
+                    Icon(
+                        imageVector = Icons.Default.Favorite,
+                        contentDescription = "Favorites",
+                        tint = Color.Cyan
+                    )
+                }
+            }
+
+        }
+
+    }
+}
+
 
 @Composable
 fun HorizontalScrollableImageView(movie: Movie = getMovies()[0]) {
-    LazyRow {
-        items(movie.images) { image ->
-            Card(
-                modifier = Modifier
-                    .padding(12.dp)
-                    .size(240.dp),
-                elevation = 4.dp
-            ) {
+    LazyRow{
+        items(movie.images){ image ->
+
+            Card(modifier = Modifier
+                .padding(12.dp)
+                .size(240.dp),
+                elevation = 4.dp) {
+
                 AsyncImage(
                     model = image,
-                    contentDescription = null,
-
-                    )
+                    contentDescription = "movie image"
+                )
             }
+
         }
     }
 }

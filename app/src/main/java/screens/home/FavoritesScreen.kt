@@ -1,9 +1,7 @@
 package screens.home
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
@@ -12,47 +10,61 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.rememberNavController
 import com.example.movies.widgets.MovieRow
 import com.example.testapp.models.Movie
 import com.example.testapp.models.getMovies
+import models.FavoritesViewModel
 
 @Composable
-fun favorites(navController: NavController = rememberNavController()) {
+fun FavoritesScreen(navController: NavController = rememberNavController(), viewModel: FavoritesViewModel = viewModel()) {
 
-    val favs = filterFavorites()
+    val movies = viewModel.favorite
 
     Scaffold(
         topBar = {
-            TopAppBar(elevation = 3.dp) {
+            TopAppBar(elevation = 3.dp ) {
                 Row {
                     Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Arrow back",
                         modifier = Modifier.clickable {
                             navController.popBackStack()
                         })
+
                     Spacer(modifier = Modifier.width(20.dp))
+
                     Text(text = "My Favorite Movies", style = MaterialTheme.typography.h6)
                 }
+
             }
         }
     ) {
-        MainContent(navController = navController, favs)
+        MainContent(movies = movies, navController = navController, viewModel = viewModel)
     }
 }
 
 @Composable
-fun MainContent(navController: NavController, movieList: List<Movie>) {
+fun MainContent(movies: List<Movie>, navController: NavController, viewModel: FavoritesViewModel) {
 
-    LazyColumn {
-        items(movieList) { name ->
-            MovieRow(name) { movieId ->
-                navController.navigate(route = "detailscreen/$movieId")
 
+    Surface(
+        modifier = Modifier
+            .fillMaxWidth()
+            .fillMaxHeight()
+    ) {
+
+        LazyColumn {
+            items(movies) { name ->
+                MovieRow(name,
+                    onItemClick = { movieId ->
+                        //Log.d("MainContent","My callback value: $movieId")
+                        navController.navigate(route = "detailscreen/$movieId")
+                    }
+
+                )
             }
         }
     }
-}
-fun filterFavorites(): List<Movie> {
-    return getMovies().take(2)
+
 }
